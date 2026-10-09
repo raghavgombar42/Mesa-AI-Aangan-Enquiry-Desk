@@ -51,17 +51,55 @@ tell me the new figure.
 - **Emotion / expressiveness** (if offered): warm / friendly, low intensity.
 
 ### Actions: System & Custom Tools
-- **End call:** ON, so the agent can hang up after the goodbye.
-- **Transfer call:** only switch ON if Aangan has a real front-desk number to transfer to during 10am–7pm. Leave OFF
-  for the class demo.
-- **Custom tools:** none yet. Later I'll build two tools on our app, "get open slots" and "book consultation", so
-  Asha can book the Cal.com slot during the call. Send me a screenshot of the "add custom tool" form when you get
-  here; I need to see what it asks for (URL, method, parameters) before building.
+
+**System Tools**
+- `hold_call`: OFF
+- `transfer_call`: OFF for the demo. Switch ON only once Aangan has a real front-desk number to transfer to (10am–7pm).
+- `schedule_callback`: OFF (designers call back from the Telegram card; this would create a second, untracked callback)
+- `agent_transfer`: OFF (one agent only)
+
+**Integration Tools**: all OFF. Vaani's own `book_appointment` / `Check_availability_booking` would book outside our
+dashboard, so HubSpot and Telegram would never hear about it. Our two custom tools below book in Cal.com AND update
+the dashboard, HubSpot and the designer card. `send_whatsapp_message` and `google_sheets_sync` are out of scope.
+
+**Custom Tools**: create these two (Create Custom Tool). The `TOOLS_SECRET` value is in `aangan-desk/.env.local`.
+
+Tool 1
+
+| Field | Value |
+|---|---|
+| Name | `get_open_slots` |
+| Description | `Finds open consultation slots with an Aangan designer. Call this once the caller's project fits and they want to book. Pass their preferred day and time of day if they gave one. Returns up to 3 slots; offer at most two to the caller, using the spoken text.` |
+| API Endpoint | `POST` `https://mesa-ai-aangan-enquiry-desk.vercel.app/api/tools/slots` |
+| Timeout | `15000` |
+| Headers | `Authorization` = `Bearer <TOOLS_SECRET>` and `Content-Type` = `application/json` |
+| Query parameters | none |
+| Parameter 1 | `preferred_day` · string · optional · `Day the caller prefers, e.g. Monday, tomorrow, weekend, or a date like 2026-10-14. Empty if no preference.` |
+| Parameter 2 | `preferred_time_of_day` · string · optional · `morning, afternoon or evening. Empty if no preference.` |
+| Store fields as variables | none |
+
+Tool 2
+
+| Field | Value |
+|---|---|
+| Name | `book_consultation` |
+| Description | `Books the consultation slot the caller chose. Only use a start value returned by get_open_slots. Requires the caller's name. Returns whether it was booked and what to tell the caller.` |
+| API Endpoint | `POST` `https://mesa-ai-aangan-enquiry-desk.vercel.app/api/tools/book` |
+| Timeout | `20000` |
+| Headers | same two as Tool 1 |
+| Parameter 1 | `slot_start` · string · required · `The exact start value of the chosen slot from get_open_slots.` |
+| Parameter 2 | `caller_name` · string · required · `The caller's name.` |
+| Parameter 3 | `caller_phone` · string · optional · `The caller's phone number if known.` |
+| Parameter 4 | `site_visit` · boolean · optional · `true if the caller wants the designer to visit the site.` |
+| Parameter 5 | `notes` · string · optional · `One line: area, BHK, scope, e.g. 2BHK Baner, full home with kitchen.` |
+| Store fields as variables | `booking_uid` → `booking_uid` (optional) |
+
+The app refuses any time that isn't actually open in Cal.com, so the agent can't book a time it made up.
 
 ### Memories
-- If there is a **per-caller memory** (remembers a returning phone number), turn it ON. It helps with callers like
-  T16 who ring back because nobody followed up.
-- Otherwise leave it OFF. Our dashboard already flags repeat callers.
+- **Use Previous Call Contexts:** ON. A caller who rings back (like T16, whose first call was never followed up) is
+  recognised, so Asha doesn't ask everything again.
+- **Feed Context via API:** OFF.
 
 ## 3. Training tab
 

@@ -54,3 +54,16 @@ CREATE TABLE IF NOT EXISTS aangan_events (
 );
 
 CREATE INDEX IF NOT EXISTS aangan_events_call_idx ON aangan_events (call_id, at);
+
+-- Consultations the voice agent booked mid-call (Vaani custom tool). Claimed by the call record once its
+-- transcript arrives, matched on time window and caller phone/name.
+CREATE TABLE IF NOT EXISTS aangan_tool_bookings (
+  booking_uid   TEXT PRIMARY KEY,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  start_at      TIMESTAMPTZ NOT NULL,
+  caller_name   TEXT,
+  caller_phone  TEXT,
+  site_visit    BOOLEAN NOT NULL DEFAULT false,
+  notes         TEXT,
+  call_id       UUID REFERENCES aangan_calls(id) ON DELETE SET NULL
+);

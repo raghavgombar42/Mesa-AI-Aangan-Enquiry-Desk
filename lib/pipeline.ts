@@ -79,12 +79,43 @@ export async function processCall(id: string) {
         ai_inr = ai_inr + ${aiInr}, status = 'done', error = NULL
       WHERE id = ${id}`;
     await logEvent(id, "decided", { route, reason });
+    await attachToolBooking(id);
   } catch (e) {
     await sql()`UPDATE aangan_calls SET status = 'error', error = ${msg(e)} WHERE id = ${id}`;
     await logEvent(id, "error", { step: "extract", error: msg(e) });
     return;
   }
   await syncCall(id);
+}
+
+/**
+ * Links a consultation the agent booked during this call (Vaani tool) to the call record.
+ * Match: an unclaimed booking made while the call was live (start - 15 min .. end + 5 min), preferring the same
+ * phone number, then the same caller name.
+ */
+async function attachToolBooking(id: string) {
+  const call = (await getCall(id))!;
+  if (call.booking_start) return;
+  // Start 15 min early in case Vaani only reports when the call ended.
+  const from = new Date(new Date(call.started_at).getTime() - 15 * 60_000);
+  const to = new Date(new Date(call.started_at).getTime() + ((call.duration_sec ?? 900) + 300) * 1000);
+  const candidates = (await sql()`
+    SELECT booking_uid, start_at, caller_name, caller_phone FROM aangan_tool_bookings
+    WHERE call_id IS NULL AND created_at BETWEEN ${from.toISOString()} AND ${to.toISOString()}
+    ORDER BY created_at`) as { booking_uid: string; start_at: string; caller_name: string | null; caller_phone: string | null }[];
+  if (!candidates.length) return;
+  const norm = (s: string | null) => (s ?? "").replace(/\D/g, "").slice(-10);
+  const first = (s: string | null) => (s ?? "").trim().split(/\s+/)[0]?.toLowerCase();
+  const pick =
+    candidates.find((b) => call.caller_phone && norm(b.caller_phone) && norm(b.caller_phone) === norm(call.caller_phone)) ??
+    candidates.find((b) => call.caller_name && first(b.caller_name) === first(call.caller_name)) ??
+    (candidates.length === 1 ? candidates[0] : null);
+  if (!pick) return;
+  const calcom: SyncStatus = { status: "sent", at: new Date().toISOString(), detail: "Booked by the voice agent during the call" };
+  await sql()`UPDATE aangan_tool_bookings SET call_id = ${id} WHERE booking_uid = ${pick.booking_uid}`;
+  await sql()`UPDATE aangan_calls SET booking_start = ${pick.start_at}, booking_uid = ${pick.booking_uid},
+                calcom = ${JSON.stringify(calcom)}::jsonb WHERE id = ${id}`;
+  await logEvent(id, "booked", { start: pick.start_at, via: "voice agent" });
 }
 
 /** Pushes the call to HubSpot and Telegram. Safe to re-run: skips whatever already went through. */

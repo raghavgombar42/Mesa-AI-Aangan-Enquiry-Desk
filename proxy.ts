@@ -11,7 +11,7 @@ export function proxy(request: NextRequest) {
   return NextResponse.redirect(new URL("/login", request.url));
 }
 
-// Webhooks carry their own secrets (Vaani HMAC signature, Telegram secret token, ingest bearer token).
+// Webhooks and agent tools carry their own secrets (Vaani HMAC signature, Telegram secret token, bearer tokens).
 export const config = {
-  matcher: ["/((?!login|api/login|api/vaani|api/telegram|api/calls|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!login|api/login|api/vaani|api/telegram|api/calls|api/tools|_next/static|_next/image|favicon.ico).*)"],
 };
