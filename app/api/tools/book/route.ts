@@ -3,7 +3,7 @@ import { sql } from "@/lib/db";
 import { createBooking, openSlots } from "@/lib/integrations/calcom";
 import { authorised, logTool, readArgs, spoken, str } from "@/lib/tools";
 
-// Vaani custom tool "book_consultation". Books only a slot that is actually open (never a time the
+// Vaani custom tool "create_aangan_booking". Books only a slot that is actually open (never a time the
 // model made up), then parks the booking until the call's transcript arrives and claims it.
 export async function POST(request: Request) {
   if (!authorised(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -82,7 +82,7 @@ Tool 2
 
 | Field | Value |
 |---|---|
-| Name | `book_consultation` |
+| Name | `create_aangan_booking` |
 | Description | `Books the consultation slot the caller chose. Only use a start value returned by get_open_slots. Requires the caller's name. Returns whether it was booked and what to tell the caller.` |
 | API Endpoint | `POST` `https://mesa-ai-aangan-enquiry-desk.vercel.app/api/tools/book` |
 | Timeout | `20000` |
