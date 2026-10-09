@@ -105,6 +105,17 @@ export async function syncCall(id: string) {
   }
 }
 
+/** Pushes only to HubSpot (e.g. loading earlier calls after HubSpot gets connected). Skips calls already sent. */
+export async function syncHubspotOnly(id: string) {
+  const call = (await getCall(id))!;
+  const route = effectiveRoute(call);
+  if (!route || !call.facts || call.hubspot.status === "sent") return call.hubspot;
+  const hubspot = await runSync(() => hubspotFor(call, route));
+  await sql()`UPDATE aangan_calls SET hubspot = ${JSON.stringify(hubspot)}::jsonb WHERE id = ${id}`;
+  await logEvent(id, "hubspot", hubspot);
+  return hubspot;
+}
+
 /** Sends (or re-sends) only the Telegram message for a call - e.g. after Telegram gets connected. */
 export async function syncTelegramOnly(id: string) {
   const call = (await getCall(id))!;
