@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Card, RouteBadge, Stat, rupees, when } from "@/components/ui";
-import { VOICE_INR_PER_SEC } from "@/lib/config";
+import { VOICE_INR_PER_MIN } from "@/lib/config";
 import { effectiveRoute } from "@/lib/db";
 import { computeMetrics, listCalls } from "@/lib/metrics";
 import { headline } from "@/lib/pipeline";
@@ -56,7 +56,7 @@ export default async function Overview(props: PageProps<"/">) {
       {m.simulated > 0 && (
         <p className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
           {m.simulated} of {m.total} calls are replays of the September transcripts (Vaani isn&apos;t connected yet). Their voice cost is projected at
-          ₹{VOICE_INR_PER_SEC}/sec, and alert / claim times reflect when they were replayed.
+          ₹{VOICE_INR_PER_MIN}/min (Vaani&apos;s estimate), and alert / claim times reflect when they were replayed.
         </p>
       )}
 

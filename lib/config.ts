@@ -63,9 +63,10 @@ export const AVG_PROJECT_VALUE = [800_000, 1_400_000] as const;
 export const CLAIM_SLA_MINUTES = Number(process.env.CLAIM_SLA_MINUTES ?? 30);
 
 // ---------- Cost model ----------
-// Vaani Labs publishes per-second billing; 4 paise/sec is the published voice-agent rate (vaanilabs.in/docs/api).
-// CONFIRM the rate for phone (telephony) calls on the Vaani console - it may differ.
-export const VOICE_INR_PER_SEC = Number(process.env.VOICE_INR_PER_SEC ?? 0.04);
+// The Aangan agent's Overview in Vaani shows "₹5.60/min (est.)" for its chosen voice, ears and brain
+// (seen 9 Oct 2026). It changes when the models change - set VOICE_INR_PER_MIN to the new figure.
+export const VOICE_INR_PER_MIN = Number(process.env.VOICE_INR_PER_MIN ?? 5.6);
+export const VOICE_INR_PER_SEC = VOICE_INR_PER_MIN / 60;
 // Gemini 3.6 Flash list price (USD per 1M tokens) as of Aug 2026; thinking tokens bill as output.
 export const GEMINI_USD_PER_M_INPUT = Number(process.env.GEMINI_USD_PER_M_INPUT ?? 0.75);
 export const GEMINI_USD_PER_M_OUTPUT = Number(process.env.GEMINI_USD_PER_M_OUTPUT ?? 3.75);

@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui";
 import {
   APP_URL, CLAIM_SLA_MINUTES, CLEARLY_BELOW_RATIO, COMMERCIAL_MAX_SQFT, COMMERCIAL_MIN_SQFT, EXCLUDED_AREAS,
-  GEMINI_MODEL, GEMINI_USD_PER_M_INPUT, GEMINI_USD_PER_M_OUTPUT, integrations, MIN_LEAD_WEEKS, SERVICE_AREAS, USD_INR, VOICE_INR_PER_SEC,
+  GEMINI_MODEL, GEMINI_USD_PER_M_INPUT, GEMINI_USD_PER_M_OUTPUT, integrations, MIN_LEAD_WEEKS, SERVICE_AREAS, USD_INR, VOICE_INR_PER_MIN,
 } from "@/lib/config";
 import { APPROVED_PRICE_LINE } from "@/lib/pricing";
 
@@ -111,7 +111,7 @@ export default function SetupPage() {
         </Card>
         <Card title="Rates used for cost">
           <dl className="space-y-1 text-xs">
-            <div className="flex justify-between"><dt>Vaani voice</dt><dd className="font-mono">₹{VOICE_INR_PER_SEC}/sec (published voice-agent rate; confirm phone rate)</dd></div>
+            <div className="flex justify-between"><dt>Vaani voice</dt><dd className="font-mono">₹{VOICE_INR_PER_MIN}/min (Vaani agent estimate; set VOICE_INR_PER_MIN)</dd></div>
             <div className="flex justify-between"><dt>{GEMINI_MODEL}</dt><dd className="font-mono">${GEMINI_USD_PER_M_INPUT} in / ${GEMINI_USD_PER_M_OUTPUT} out per 1M tokens</dd></div>
             <div className="flex justify-between"><dt>USD → INR</dt><dd className="font-mono">{USD_INR} (set USD_INR)</dd></div>
             <div className="flex justify-between"><dt>Lead claim deadline</dt><dd className="font-mono">{CLAIM_SLA_MINUTES} min</dd></div>
