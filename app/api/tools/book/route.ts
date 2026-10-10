@@ -14,6 +14,7 @@ export async function POST(request: Request) {
   const start = str(args.slot_start);
   const name = str(args.caller_name);
   const phone = str(args.caller_phone);
+  const email = str(args.caller_email);
   const siteVisit = String(args.site_visit ?? "").toLowerCase() === "true";
   const notes = str(args.notes) ?? "";
 
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
       start: exact,
       name,
       phone,
+      email,
       callId: "pending",
       notes: `${siteVisit ? "SITE VISIT requested. " : ""}${notes}`.trim(),
     });

@@ -38,7 +38,7 @@ async function stageFor(booked: boolean) {
   return { pipeline, stage: stage.id, label: stage.label };
 }
 
-async function findOrCreateContact(c: { phone: string | null; name: string | null; city: string | null; locality: string | null }) {
+async function findOrCreateContact(c: { phone: string | null; email?: string | null; name: string | null; city: string | null; locality: string | null }) {
   if (c.phone) {
     const found = await hs<{ results: { id: string }[] }>("/crm/v3/objects/contacts/search", {
       method: "POST",
@@ -54,6 +54,7 @@ async function findOrCreateContact(c: { phone: string | null; name: string | nul
         firstname: first,
         lastname: rest.join(" ") || undefined,
         phone: c.phone ?? undefined,
+        email: c.email ?? undefined,
         city: c.city ?? (c.locality ? "Pune" : undefined),
         lifecyclestage: "lead",
       },
@@ -64,6 +65,7 @@ async function findOrCreateContact(c: { phone: string | null; name: string | nul
 
 export type DealInput = {
   phone: string | null;
+  email?: string | null;
   name: string | null;
   city: string | null;
   locality: string | null;

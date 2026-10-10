@@ -36,10 +36,11 @@ export async function openSlots(days = 7): Promise<string[]> {
   return Object.values(res.data ?? {}).flat().map((s) => s.start);
 }
 
-export async function createBooking(opts: { start: string; name: string; phone: string | null; notes: string; callId: string }) {
-  // Phone callers rarely give an email; Cal.com needs one for the attendee, so the studio inbox stands in
-  // and the caller's number travels in the notes.
-  const email = process.env.CALCOM_ATTENDEE_EMAIL;
+export async function createBooking(opts: { start: string; name: string; phone: string | null; email?: string | null; notes: string; callId: string }) {
+  // The caller's own email when they gave one (Cal.com then sends them the invite); otherwise the studio
+  // inbox stands in and the caller's number travels in the notes.
+  const callerEmail = opts.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(opts.email) ? opts.email : null;
+  const email = callerEmail ?? process.env.CALCOM_ATTENDEE_EMAIL;
   if (!email) throw new Error("Set CALCOM_ATTENDEE_EMAIL (the studio inbox that receives booking confirmations)");
   const res = await cal<{ data: { uid: string; start: string; status: string } }>("/bookings", "2026-02-25", {
     method: "POST",

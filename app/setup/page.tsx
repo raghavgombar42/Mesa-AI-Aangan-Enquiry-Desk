@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Card } from "@/components/ui";
 import {
   APP_URL, CLAIM_SLA_MINUTES, CLEARLY_BELOW_RATIO, COMMERCIAL_MAX_SQFT, COMMERCIAL_MIN_SQFT, EXCLUDED_AREAS,
@@ -71,6 +72,9 @@ export default function SetupPage() {
       <div>
         <h1 className="text-xl font-semibold">Setup &amp; rules</h1>
         <p className="text-stone-500">Each connection runs in dry-run until its keys are in the environment, so nothing breaks while accounts are being set up.</p>
+        <p className="mt-2 text-sm">
+          To test without a phone call, <Link href="/simulate" className="underline">replay a call through the pipeline</Link>.
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

@@ -32,7 +32,11 @@ const EXPECTED_DECISION_DAYS = 45;
 
 const msg = (e: unknown) => String((e as Error)?.message ?? e).slice(0, 500);
 
+/** A caller number is only kept if it looks like one (Vaani web tests send "web-user"). */
+export const cleanPhone = (p: string | null | undefined) => (p && (p.match(/\d/g) ?? []).length >= 7 ? p.trim() : null);
+
 export async function createCall(c: NewCall): Promise<{ id: string; duplicate: boolean }> {
+  c = { ...c, callerPhone: cleanPhone(c.callerPhone) };
   if (c.externalId) {
     const [dup] = await sql()`SELECT id FROM aangan_calls WHERE external_id = ${c.externalId}`;
     if (dup) return { id: dup.id as string, duplicate: true };
@@ -185,6 +189,7 @@ async function hubspotFor(call: CallRow, route: Route): Promise<SyncStatus> {
   const amount = call.band_low != null ? (Number(call.band_low) + Number(call.band_high)) / 2 : null;
   return syncToHubspot({
     phone: call.caller_phone,
+    email: f.caller_email,
     name: call.caller_name ?? f.caller_name,
     city: f.city,
     locality: f.locality,
@@ -216,9 +221,11 @@ async function telegramFor(call: CallRow, route: Route): Promise<SyncStatus> {
     });
   }
   if (route === "incomplete") {
+    // A dropped call is only worth a card if there is a number to call back.
+    if (!call.caller_phone) return { status: "skipped", at: new Date().toISOString(), detail: "Dropped call with no number" };
     return sendTelegram({
       to: "designers", callId: call.id, url, claimable: true,
-      html: [`📞 <b>Dropped call - please call back</b>`, `${when}`, line("Phone", call.caller_phone), url].filter(Boolean).join("\n"),
+      html: [`📞 <b>Dropped call - please call back</b>`, `${when}`, line("Phone", call.caller_phone)].filter(Boolean).join("\n"),
     });
   }
   if (!isLead(route)) return { status: "skipped", at: new Date().toISOString(), detail: `${ROUTE_LABEL[route]}: no designer alert` };
@@ -227,19 +234,20 @@ async function telegramFor(call: CallRow, route: Route): Promise<SyncStatus> {
   return sendTelegram({
     to: "designers", callId: call.id, url, claimable: true,
     html: [
-      `🏠 <b>New enquiry added to the dashboard</b>`,
+      `🏠 <b>New enquiry for a designer</b>`,
       `<b>${esc(headline(f))}</b> · ${name} · ${when}`,
       route === "book_note" ? `⚠️ ${esc(call.route_reason ?? "")}` : null,
       line("Scope", f.scope_summary),
       line("Size", f.carpet_sqft ? `${f.carpet_sqft.toLocaleString("en-IN")} sq ft carpet` : null),
       line("Timeline", f.timeline_text),
       line("Decision", f.decision_note),
-      line("Booked", call.booking_start ? new Date(call.booking_start).toLocaleString("en-IN", { timeZone: TIME_ZONE, weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) : "not yet - pick a slot in the dashboard"),
+      line("Booked", call.booking_start ? new Date(call.booking_start).toLocaleString("en-IN", { timeZone: TIME_ZONE, weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) : "not yet - call to fix a time"),
       line("Indicative (internal only)", band),
       call.flags.length ? `<b>Flags:</b> ${esc(call.flags.join(" · "))}` : null,
       "",
       esc(call.handoff_note ?? ""),
       line("Phone", call.caller_phone),
+      line("Email", f.caller_email),
     ].filter((x) => x !== null).join("\n"),
   });
 }

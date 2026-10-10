@@ -9,6 +9,7 @@ import { SERVICES_MD } from "./knowledge-text";
 export type Facts = {
   call_kind: "new_enquiry" | "existing_client_issue" | "follow_up_on_earlier_enquiry" | "not_an_enquiry" | "no_conversation";
   caller_name: string | null;
+  caller_email: string | null;
   language: string;
   locality: string | null;
   city: string | null;
@@ -53,6 +54,7 @@ const SCHEMA = {
       "new_enquiry = anyone asking about getting interiors designed or done, even if it turns out to be out of scope, out of area or advice-only. existing_client_issue = someone whose project with the studio is already running. follow_up_on_earlier_enquiry = they enquired before and are chasing a reply. not_an_enquiry = vendors, job seekers, sales calls, wrong numbers. no_conversation = dropped/silent call with no usable content.",
     ),
     caller_name: nullable("string", "Name the caller gave, else null."),
+    caller_email: nullable("string", "Email address the caller gave (as confirmed on the call, written normally, e.g. meera@gmail.com). Null if none."),
     language: { type: "string", description: "Main language of the call: English, Hindi, Marathi, Hinglish..." },
     locality: nullable("string", "Neighbourhood / area of the SITE as the caller said it (e.g. 'Kothrud', 'Pimple Saudagar'). Null if not said."),
     city: nullable("string", "City of the SITE if said or unambiguous from the locality (e.g. 'Pune', 'Nashik'). Null if unknown."),
@@ -108,7 +110,7 @@ const SCHEMA = {
     },
   },
   required: [
-    "call_kind", "caller_name", "language", "locality", "city", "segment", "property_type", "bhk", "carpet_sqft",
+    "call_kind", "caller_name", "caller_email", "language", "locality", "city", "segment", "property_type", "bhk", "carpet_sqft",
     "scope_level", "rooms", "scope_summary", "wants_execution", "current_state", "ownership", "timeline_text",
     "complete_by_date", "decision_maker", "decision_note", "budget_min_inr", "budget_max_inr", "price_asks",
     "referral", "preferred_times", "site_visit_requested", "sentiment", "wants_human", "complaint_summary",

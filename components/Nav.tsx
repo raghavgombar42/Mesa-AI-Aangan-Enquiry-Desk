@@ -3,11 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+// Nikhil's two screens. The builder tools (setup, simulator) sit behind the small "Setup" link.
 const LINKS = [
   { href: "/", label: "Overview" },
   { href: "/calls", label: "Calls" },
-  { href: "/simulate", label: "Simulate a call" },
-  { href: "/setup", label: "Setup & rules" },
 ];
 
 export function Nav({ logout }: { logout: React.ReactNode }) {
@@ -33,6 +32,9 @@ export function Nav({ logout }: { logout: React.ReactNode }) {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-4">
+          <Link href="/setup" className={`whitespace-nowrap text-xs ${path.startsWith("/setup") || path.startsWith("/simulate") ? "text-stone-900" : "text-stone-400 hover:text-stone-700"}`}>
+            Setup
+          </Link>
           <div className="hidden whitespace-nowrap text-right leading-tight lg:block">
             <div className="font-medium">Nikhil Deshpande</div>
             <div className="text-xs text-stone-500">Aangan Studio</div>

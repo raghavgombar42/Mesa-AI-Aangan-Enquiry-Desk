@@ -34,9 +34,12 @@ export async function sendTelegram(opts: {
   if (!process.env.TELEGRAM_BOT_TOKEN || !chat) {
     return { status: "dry_run", at, detail: `Would message ${opts.to === "nikhil" ? "Nikhil" : "the designers' group"}` };
   }
+  // Designers get a self-contained card and a claim button only - the dashboard (costs, pipeline) is
+  // Nikhil's. Only his escalation alerts link to it.
+  const link = opts.to === "nikhil" ? linkButton(opts.url) : null;
   const rows = [
     ...(opts.claimable ? [[{ text: "I'll take it", callback_data: `claim:${opts.callId}` }]] : []),
-    ...(linkButton(opts.url) ? [linkButton(opts.url)!] : []),
+    ...(link ? [link] : []),
   ];
   const msg = await tg<{ message_id: number }>("sendMessage", {
     chat_id: chat,
