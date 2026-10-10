@@ -1,13 +1,16 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { createBooking, openSlots } from "@/lib/integrations/calcom";
-import { authorised, logTool, readArgs, spoken, str } from "@/lib/tools";
+import { authorised, logTool, logToolRequest, parseArgs, spoken, str } from "@/lib/tools";
 
 // Vaani custom tool "create_aangan_booking". Books only a slot that is actually open (never a time the
 // model made up), then parks the booking until the call's transcript arrives and claims it.
 export async function POST(request: Request) {
-  if (!authorised(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const args = await readArgs(request);
+  const bodyText = request.method === "GET" ? "" : await request.text();
+  const ok = authorised(request);
+  await logToolRequest("book", request, bodyText, ok);
+  if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const args = parseArgs(request, bodyText);
   const start = str(args.slot_start);
   const name = str(args.caller_name);
   const phone = str(args.caller_phone);
@@ -43,3 +46,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, message: "The booking didn't go through. Tell the caller a designer will call them to confirm a time." });
   }
 }
+
+export const GET = POST;

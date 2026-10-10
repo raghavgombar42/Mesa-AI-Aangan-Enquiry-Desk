@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { integrations } from "@/lib/config";
 import { openSlots } from "@/lib/integrations/calcom";
-import { authorised, logTool, matchPreference, readArgs, spoken, str } from "@/lib/tools";
+import { authorised, logTool, matchPreference, logToolRequest, parseArgs, spoken, str } from "@/lib/tools";
 
 // Vaani custom tool "get_open_slots". Returns up to 3 consultation slots and a sentence the agent can say.
 export async function POST(request: Request) {
-  if (!authorised(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const args = await readArgs(request);
+  const bodyText = request.method === "GET" ? "" : await request.text();
+  const ok = authorised(request);
+  await logToolRequest("slots", request, bodyText, ok);
+  if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const args = parseArgs(request, bodyText);
   const day = str(args.preferred_day);
   const timeOfDay = str(args.preferred_time_of_day);
 
@@ -30,3 +33,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, slots: [], message: "The calendar didn't respond. Tell the caller a designer will call them to fix a time." });
   }
 }
+
+export const GET = POST;

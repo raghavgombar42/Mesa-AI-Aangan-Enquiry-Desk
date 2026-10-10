@@ -10,10 +10,29 @@ export function authorised(request: Request) {
   return !!secret && request.headers.get("authorization") === `Bearer ${secret}`;
 }
 
-export async function readArgs(request: Request): Promise<Record<string, unknown>> {
+/** Logs the shape of an incoming tool call (method, query, body, whether a bearer token was sent - never its value). */
+export async function logToolRequest(name: string, request: Request, bodyText: string, ok: boolean) {
+  const auth = request.headers.get("authorization");
+  await sql()`INSERT INTO aangan_events (call_id, kind, detail) VALUES (NULL, ${`tool:${name}:request`}, ${JSON.stringify({
+    ok,
+    method: request.method,
+    query: new URL(request.url).search,
+    contentType: request.headers.get("content-type"),
+    userAgent: request.headers.get("user-agent"),
+    auth: auth ? (auth.startsWith("Bearer ") ? `Bearer (len ${auth.length - 7})` : "present, not Bearer") : "missing",
+    body: bodyText.slice(0, 2000),
+  })}::jsonb)`;
+}
+
+export function parseArgs(request: Request, bodyText: string): Record<string, unknown> {
   const url = new URL(request.url);
   const fromQuery = Object.fromEntries(url.searchParams.entries());
-  const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
+  let body: Record<string, unknown> = {};
+  try {
+    body = bodyText ? (JSON.parse(bodyText) as Record<string, unknown>) : {};
+  } catch {
+    body = {};
+  }
   const nested = [body.args, body.arguments, body.parameters, body.params].find((v) => v && typeof v === "object") as
     | Record<string, unknown>
     | undefined;
