@@ -39,10 +39,13 @@ which are connected.
 
 ## Connecting the rest
 
-- **Vaani Labs** (waiting on API access): build the flow in the Vaani dashboard, attach the number, and point a `call.completed`
-  webhook at `<APP_URL>/api/vaani/webhook`. Then set `VAANI_WEBHOOK_SECRET`. Signature checking follows Vaani's published spec.
-  Vaani hasn't published the fields inside `data`, so `lib/integrations/vaani.ts` tries the common names and keeps the raw
-  payload. Pin the real names after the first test call.
+- **Vaani Labs** (connected 10 Oct): agent "Aangan Studio". The webhook is set under Developers → Webhooks (event
+  Call Post-Processing, "send all call details", secret = `VAANI_WEBHOOK_SECRET`). Vaani's real deliveries differ from its
+  API docs: header `x-webhook-signature: sha256=<HMAC of raw body>` and body `{ event, events: [{ event: "call_postprocessing",
+  data: { call_id, call_duration, transcript, recording_url, entities, ... } }] }`. `lib/integrations/vaani.ts` handles both.
+  Chat tests in Vaani do **not** send the webhook; only voice calls do. Mid-call custom tools (`get_open_slots`,
+  `create_aangan_booking`, secret `TOOLS_SECRET`) failed inside Vaani during chat tests, with no request reaching the app.
+  If that persists on voice, use `knowledge/vaani-agent-prompt-no-tools.md` and book from the dashboard.
 - **Telegram**: create a bot with @BotFather, add it to the designers' group, then run `npm run telegram:setup` to get the chat
   id. After deploying, run it again to route button clicks to `/api/telegram/webhook`.
 - **HubSpot**: create a private app with contacts and deals read/write scopes, then set `HUBSPOT_TOKEN`. Deal stages are read
