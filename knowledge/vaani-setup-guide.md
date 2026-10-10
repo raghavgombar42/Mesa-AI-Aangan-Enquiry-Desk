@@ -12,7 +12,7 @@ The system prompt is in `vaani-agent-prompt.md` (same folder). The webhook and d
 
 | Field | What to put |
 |---|---|
-| **Greeting Message** → Edit Message | `Namaste! Aangan Studio, this is Asha. How can I help you today?` |
+| **Greeting Message** → Edit Message | `Namaste, and thank you for calling Aangan Studio! I'm Asha, Aangan's AI assistant. I can answer questions about your interior project and book you a free online consultation with one of our designers. How can I help you today?` |
 | **System Prompt** → Edit System Prompt | Paste **everything** in `vaani-agent-prompt.md` |
 | Identity / Language / pipeline | Set in the Persona tab (below) |
 
@@ -89,9 +89,9 @@ Tool 2
 | Headers | same two as Tool 1 |
 | Parameter 1 | `slot_start` · string · required · `The exact start value of the chosen slot from get_open_slots.` |
 | Parameter 2 | `caller_name` · string · required · `The caller's name.` |
-| Parameter 3 | `caller_phone` · string · optional · `The caller's phone number if known.` |
-| Parameter 4 | `site_visit` · boolean · optional · `true if the caller wants the designer to visit the site.` |
-| Parameter 5 | `notes` · string · optional · `One line: area, BHK, scope, e.g. 2BHK Baner, full home with kitchen.` |
+| Parameter 3 | `caller_phone` · string · required · `The caller's phone number, which you must ask for and read back before booking.` |
+| Parameter 4 | `notes` · string · optional · `One line: area, BHK, scope, e.g. 2BHK Baner, full home with kitchen.` |
+| Parameter 5 | `caller_email` · string · optional · `The caller's email if they gave one, e.g. meera@gmail.com. Leave empty if not given.` |
 | Store fields as variables | `booking_uid` → `booking_uid` (optional) |
 
 The app refuses any time that isn't actually open in Cal.com, so the agent can't book a time it made up.
