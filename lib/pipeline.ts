@@ -234,7 +234,7 @@ async function telegramFor(call: CallRow, route: Route): Promise<SyncStatus> {
       line("Size", f.carpet_sqft ? `${f.carpet_sqft.toLocaleString("en-IN")} sq ft carpet` : null),
       line("Timeline", f.timeline_text),
       line("Decision", f.decision_note),
-      line("Booked", call.booking_start ? new Date(call.booking_start).toLocaleString("en-IN", { timeZone: TIME_ZONE }) : "not yet - pick a slot in the dashboard"),
+      line("Booked", call.booking_start ? new Date(call.booking_start).toLocaleString("en-IN", { timeZone: TIME_ZONE, weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) : "not yet - pick a slot in the dashboard"),
       line("Indicative (internal only)", band),
       call.flags.length ? `<b>Flags:</b> ${esc(call.flags.join(" · "))}` : null,
       "",
