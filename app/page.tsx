@@ -38,9 +38,10 @@ export default async function Overview(props: PageProps<"/">) {
   }
 
   // "Needs you" is only what a founder must act on: unhappy existing clients, and leads no designer has picked up.
-  const needsYou = m.attention.filter(
-    (a) => effectiveRoute(a.call) === "escalate" || a.why.startsWith("Lead not claimed") || a.why.startsWith("Pipeline error"),
-  );
+  const priority = (a: (typeof m.attention)[number]) => (effectiveRoute(a.call) === "escalate" ? 0 : a.why.startsWith("Pipeline error") ? 1 : 2);
+  const needsYou = m.attention
+    .filter((a) => effectiveRoute(a.call) === "escalate" || a.why.startsWith("Lead not claimed") || a.why.startsWith("Pipeline error"))
+    .sort((a, b) => priority(a) - priority(b));
   const pipeline = `₹${(m.avgPipeline[0] / 1e5).toFixed(0)}–${(m.avgPipeline[1] / 1e5).toFixed(0)}L`;
 
   return (
