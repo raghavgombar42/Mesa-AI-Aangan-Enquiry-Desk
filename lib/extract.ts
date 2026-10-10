@@ -96,7 +96,7 @@ const SCHEMA = {
     designer_brief: {
       type: "string",
       description:
-        "3-5 plain sentences for the designer who will call back: who, what, where, size, timeline, decision-maker, anything to handle with care. Only facts from the call. Never state or estimate a price.",
+        "3-5 plain sentences for the designer who will call back: who, what, where, size, timeline, decision-maker, anything to handle with care. Only facts from the call. Never state or estimate a price. The first meeting is a free online consultation, so never call it a site visit.",
     },
     first_call_opener: { type: "string", description: "One sentence: what the designer should open the first call with." },
     evidence: {

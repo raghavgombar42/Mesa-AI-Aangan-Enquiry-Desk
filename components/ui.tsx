@@ -1,21 +1,21 @@
 import type { SyncStatus } from "@/lib/db";
-import { ROUTE_LABEL, type Route, type Verdict } from "@/lib/rules";
+import { OUTCOME_LABEL, type Route, type Verdict } from "@/lib/rules";
 
-const ROUTE_TONE: Record<Route, string> = {
-  book: "bg-emerald-100 text-emerald-800",
-  book_note: "bg-amber-100 text-amber-800",
-  close: "bg-stone-200 text-stone-700",
-  nurture: "bg-sky-100 text-sky-800",
-  escalate: "bg-red-100 text-red-800",
-  incomplete: "bg-violet-100 text-violet-800",
+export const ROUTE_TONE: Record<Route, string> = {
+  book: "bg-emerald-50 text-emerald-800 ring-emerald-200",
+  book_note: "bg-teal-50 text-teal-800 ring-teal-200",
+  close: "bg-stone-100 text-stone-600 ring-stone-200",
+  nurture: "bg-sky-50 text-sky-800 ring-sky-200",
+  escalate: "bg-red-50 text-red-800 ring-red-200",
+  incomplete: "bg-stone-50 text-stone-500 ring-stone-200",
 };
 
 export function RouteBadge({ route, overridden }: { route: Route | null; overridden?: boolean }) {
   if (!route) return <span className="text-stone-400">…</span>;
   return (
-    <span className={`inline-block whitespace-nowrap rounded px-1.5 py-0.5 text-xs font-medium ${ROUTE_TONE[route]}`}>
-      {ROUTE_LABEL[route]}
-      {overridden && " (overridden)"}
+    <span className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${ROUTE_TONE[route]}`}>
+      {OUTCOME_LABEL[route]}
+      {overridden && " (corrected)"}
     </span>
   );
 }
@@ -41,7 +41,7 @@ export function SyncBadge({ label, s }: { label: string; s: SyncStatus }) {
 
 export function Card({ title, children, className = "", action }: { title?: React.ReactNode; children: React.ReactNode; className?: string; action?: React.ReactNode }) {
   return (
-    <section className={`rounded-lg border border-stone-200 bg-white p-4 ${className}`}>
+    <section className={`rounded-xl border border-stone-200/80 bg-white p-5 shadow-sm ${className}`}>
       {(title || action) && (
         <div className="mb-3 flex items-center justify-between gap-2">
           {title && <h2 className="font-semibold">{title}</h2>}
@@ -67,4 +67,13 @@ export const rupees = (n: number) => `₹${n.toLocaleString("en-IN", { maximumFr
 
 export function when(iso: string | null, opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) {
   return iso ? new Date(iso).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", ...opts }) : "—";
+}
+
+/** "12 min", "3 h", "2 days" - how long something has been waiting. */
+export function ago(iso: string | null, now = Date.now()) {
+  if (!iso) return "";
+  const m = Math.max(0, Math.round((now - new Date(iso).getTime()) / 60_000));
+  if (m < 60) return `${m} min`;
+  if (m < 48 * 60) return `${Math.round(m / 60)} h`;
+  return `${Math.round(m / 1440)} days`;
 }

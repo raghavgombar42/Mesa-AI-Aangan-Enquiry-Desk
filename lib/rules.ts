@@ -30,6 +30,25 @@ export const ROUTE_MEANING: Record<Route, string> = {
   incomplete: "No usable conversation (dropped or silent): call back.",
 };
 
+/** The same routes in Nikhil's words, for the dashboard. */
+export const OUTCOME_LABEL: Record<Route, string> = {
+  book: "Good lead",
+  book_note: "Good lead · check one thing",
+  close: "Not a fit",
+  nurture: "Later",
+  escalate: "Existing client",
+  incomplete: "Dropped call",
+};
+
+export const OUTCOME_MEANING: Record<Route, string> = {
+  book: "Meets all five of your criteria. Sent to the designers.",
+  book_note: "Worth a designer's time. Sent to the designers with one point to check on the first call.",
+  close: "Fails your criteria. Asha closed it politely; nothing was sent to designers.",
+  nurture: "Right project, wrong time. Worth re-contacting closer to the date they gave.",
+  escalate: "An existing client with a problem. Sent straight to you on Telegram.",
+  incomplete: "No real conversation happened (dropped or silent).",
+};
+
 const has = (list: readonly string[], text: string | null) =>
   !!text && list.some((a) => new RegExp(`\\b${a.replace(/\s+/g, "\\s*")}\\b`, "i").test(text));
 
@@ -134,7 +153,6 @@ export function flagsFor(f: Facts, startedAt: Date): string[] {
   if (f.call_kind === "follow_up_on_earlier_enquiry") flags.push("Repeat caller: earlier enquiry was missed");
   if (f.sentiment !== "calm") flags.push(f.sentiment === "angry" ? "Angry caller" : "Frustrated caller");
   if (f.wants_human) flags.push("Asked for a person");
-  if (f.site_visit_requested) flags.push("Wants a site visit");
   if (f.ownership === "rented") flags.push("Rented: no structural work");
   if (f.language && !/^english$/i.test(f.language)) flags.push(`Language: ${f.language}`);
   const local = new Date(startedAt.toLocaleString("en-US", { timeZone: TIME_ZONE }));
