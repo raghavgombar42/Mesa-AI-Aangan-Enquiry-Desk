@@ -27,7 +27,7 @@ function Funnel({ steps }: { steps: { label: string; n: number; tone: string; of
   const max = Math.max(1, steps[0].n);
   return (
     <ol className="space-y-2.5">
-      {steps.map((s, i) => {
+      {steps.map((s) => {
         return (
           <li key={s.label} className="grid grid-cols-[9.5rem_1fr_3rem] items-center gap-3 sm:grid-cols-[12rem_1fr_6rem]">
             <span className="text-stone-600">{s.label}</span>
